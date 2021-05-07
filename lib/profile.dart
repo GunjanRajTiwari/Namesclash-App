@@ -17,7 +17,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           "612757339681-u4kcl77t60vduifheh5do3fqspn4uor9.apps.googleusercontent.com");
   GoogleSignInAccount account;
   GoogleSignInAuthentication auth;
-  bool gotProfilee = false;
+  bool gotProfile = false;
 
   String name = TextEditingController().text;
   Widget _button(String textt) {
@@ -51,12 +51,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    gotProfile();
+    getProfile();
   }
 
   @override
   Widget build(BuildContext context) {
-    return gotProfilee
+    return gotProfile
         ? Scaffold(
             appBar: AppBar(
               backgroundColor: bg2,
@@ -80,7 +80,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       height: 100,
                     ),
                     Text(
-                      account.email,
+                      account.displayName,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                           fontSize: 28,
@@ -100,11 +100,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         : LinearProgressIndicator();
   }
 
-  void gotProfile() async {
+  void getProfile() async {
+    await googleSignIn.signInSilently();
     account = googleSignIn.currentUser;
     auth = await account.authentication;
     setState(() {
-      gotProfilee = true;
+      gotProfile = true;
     });
   }
 }

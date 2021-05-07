@@ -53,17 +53,13 @@ class _SplashScreenState extends State<SplashScreen> {
   void checkSignInStatus() async {
     await Future.delayed(Duration(seconds: 2));
     bool isSignedIn = await googleSignIn.isSignedIn();
-    bool ok = true;
+    //bool ok = true;
     if (isSignedIn) {
       print('USer signed in');
-      if (ok) {
-        Navigator.pushReplacementNamed(context, '/name');
-      } else {
-        Navigator.pushReplacementNamed(context, '/profile');
-      }
+      Navigator.pushReplacementNamed(context, '/profile');
     } else {
       Navigator.pushReplacementNamed(context, '/MySignInPage');
     }
-    ok = false;
+    //ok = false;
   }
 }

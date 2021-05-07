@@ -86,6 +86,7 @@ class _MySignInPageState extends State<MySignInPage> {
     var user = await googleSignIn.signIn();
     if (user == null) {
       print('Sign In failed');
+      //Navigator.pushReplacementNamed(context, '/profile');
     } else {
       Navigator.pushReplacementNamed(context, '/');
     }

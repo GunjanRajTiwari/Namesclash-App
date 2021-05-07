@@ -24,7 +24,7 @@ class NameClash extends StatelessWidget {
       routes: {
         '/': (_) => SplashScreen(),
         '/MySignInPage': (_) => MySignInPage(),
-        '/name': (_) => NamePage(),
+        //'/name': (_) => NamePage(),
         '/profile': (_) => ProfileScreen(),
       },
     );
