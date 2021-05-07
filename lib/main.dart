@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:namesclash/name.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:namesclash/profile.dart';
 import 'package:namesclash/splashscreen.dart';
 import 'package:namesclash/signin.dart';
 
@@ -24,6 +25,7 @@ class NameClash extends StatelessWidget {
         '/': (_) => SplashScreen(),
         '/MySignInPage': (_) => MySignInPage(),
         '/name': (_) => NamePage(),
+        '/profile': (_) => ProfileScreen(),
       },
     );
   }

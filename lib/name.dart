@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:namesclash/main.dart';
 import 'package:namesclash/inputbox.dart';
+import 'package:namesclash/profile.dart';
 import 'package:namesclash/signin.dart';
 
 class NamePage extends StatefulWidget {
@@ -27,7 +28,9 @@ class _NamePageState extends State<NamePage> {
         onPressed: () {
           if (showValue) {
             Navigator.push(
-                context, MaterialPageRoute(builder: (_) => NamePage()));
+              context,
+              MaterialPageRoute(builder: (_) => ProfileScreen()),
+            );
           }
         },
         color: pc,
@@ -78,72 +81,72 @@ class _NamePageState extends State<NamePage> {
   bool showValue = false;
   GoogleSignInAuthentication auth;
   bool gotProfile = false;
-  @override
-  void initState() {
-    super.initState();
-    getProfile();
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   getProfile();
+  // }
 
   @override
   Widget build(BuildContext context) {
-    return gotProfile
-        ? Scaffold(
-            backgroundColor: bg,
-            body: SafeArea(
-              //padding: const EdgeInsets.all(8.0),
-              child: Center(
-                //margin: EdgeInsets.symmetric(horizontal: 100),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: <Widget>[
-                    Image.asset(
-                      'assets/logo icon.png',
-                      height: 50,
-                    ),
-                    SizedBox(height: 50),
-                    Text(
-                      'Enter Your First Name:',
-                      style: TextStyle(
-                          fontSize: 28,
-                          fontFamily: 'Work Sans',
-                          color: Colors.white),
-                    ),
-                    //_buildName(),
-                    InputBox(
-                      maxLines: 1,
-                    ),
-                    SizedBox(height: 60.0),
-                    CheckboxListTile(
-                      title: Text(
-                        "I agree that this is my real name.",
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontFamily: 'Work Sans',
-                            color: Colors.white),
-                      ),
-                      value: this.showValue,
-                      onChanged: (bool value) {
-                        setState(() {
-                          this.showValue = value;
-                        });
-                      },
-                      controlAffinity: ListTileControlAffinity.leading,
-                    ),
-                    _button('Enter'),
-                  ],
-                ),
+    return //gotProfile
+        Scaffold(
+      backgroundColor: bg,
+      body: SafeArea(
+        //padding: const EdgeInsets.all(8.0),
+        child: Center(
+          //margin: EdgeInsets.symmetric(horizontal: 100),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: <Widget>[
+              Image.asset(
+                'assets/logo icon.png',
+                height: 50,
               ),
-            ),
-          )
-        : LinearProgressIndicator();
+              SizedBox(height: 50),
+              Text(
+                'Enter Your First Name:',
+                style: TextStyle(
+                    fontSize: 28, fontFamily: 'Work Sans', color: Colors.white),
+              ),
+              //_buildName(),
+              InputBox(
+                maxLines: 1,
+                econtroller: new TextEditingController(),
+              ),
+              SizedBox(height: 60.0),
+              CheckboxListTile(
+                title: Text(
+                  "I agree that this is my real name.",
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontFamily: 'Work Sans',
+                      color: Colors.white),
+                ),
+                value: this.showValue,
+                onChanged: (bool value) {
+                  setState(() {
+                    this.showValue = value;
+                  });
+                },
+                controlAffinity: ListTileControlAffinity.leading,
+              ),
+              _button('Enter'),
+            ],
+          ),
+        ),
+      ),
+    );
+    // : LinearProgressIndicator();
   }
 
-  void getProfile() async {
-    await googleSignIn.signInSilently();
-    account = googleSignIn.currentUser;
-    auth = await account.authentication;
-    setState(() {
-      gotProfile = true;
-    });
-  }
+//   void getProfile() async {
+//     await googleSignIn.signInSilently();
+//     account = googleSignIn.currentUser;
+//     auth = await account.authentication;
+//     setState(() {
+//       gotProfile = true;
+//     });
+//   }
+// }
 }

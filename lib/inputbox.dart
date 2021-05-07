@@ -9,7 +9,7 @@ class InputBox extends StatelessWidget {
   final String hintText;
   final String labelText;
   final TextInputType textInputType;
-  final TextEditingController controller;
+  final TextEditingController econtroller;
   final TextInputAction textInputAction;
   final FocusNode focusNode, nextFocusNode;
   final VoidCallback submitAction;
@@ -29,7 +29,7 @@ class InputBox extends StatelessWidget {
     this.hintText,
     this.labelText,
     this.textInputType,
-    this.controller,
+    this.econtroller,
     this.textInputAction,
     this.focusNode,
     this.nextFocusNode,
@@ -58,7 +58,7 @@ class InputBox extends StatelessWidget {
           onChanged: onChange,
           validator: validateFunction,
           key: key,
-          controller: controller,
+          controller: econtroller,
           keyboardType: textInputType,
           onSaved: onSaved,
           textInputAction: textInputAction,
