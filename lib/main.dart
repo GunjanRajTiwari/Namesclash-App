@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:namesclash/chatbyme.dart';
 import 'package:namesclash/name.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:namesclash/profile.dart';
@@ -22,7 +23,7 @@ class NameClash extends StatelessWidget {
       title: "NamesClash",
       //home: SplashScreen(),
       routes: {
-        '/': (_) => SplashScreen(),
+        '/': (_) => ChatScreen(),
         '/MySignInPage': (_) => MySignInPage(),
         //'/name': (_) => NamePage(),
         '/profile': (_) => ProfileScreen(),
