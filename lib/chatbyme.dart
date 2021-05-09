@@ -5,9 +5,9 @@ import 'package:namesclash/inputbox.dart';
 import 'package:namesclash/main.dart';
 import 'package:namesclash/receivedmsg.dart';
 import 'package:namesclash/sentMsg.dart';
-import 'package:socket_io_client/socket_io_client.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'dart:convert';
-import 'package:flutter_socket_io/flutter_socket_io.dart' as IO;
+//import 'package:flutter_socket_io/flutter_socket_io.dart' as IO;
 import 'package:flutter_socket_io/socket_io_manager.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -16,43 +16,45 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  SocketIO socketIO;
+  //SocketIO socketIO;
   bool show = false;
   FocusNode focusNode = FocusNode();
   bool sendButton = false;
   List<String> messages = [];
   TextEditingController _controller = TextEditingController();
   ScrollController _scrollController = ScrollController();
-  IO.SocketIO socket;
+  //IO.SocketIO socket;
+
+  IO.Socket socket;
   @override
   void initState() {
-    messages = List<String>();
-    //Initializing the TextEditingController and ScrollController
-    // textController = TextEditingController();
-    // scrollController = ScrollController();
-    //Creating the socket
-    socketIO = SocketIOManager().createSocketIO(
-      '<http://namesclash.herokuapp.com>',
-      '/',
-    );
-    //Call init before doing anything with socket
-    socketIO.init();
-    //Subscribe to an event to listen to
-    socketIO.subscribe('receive_message', (jsonData) {
-      //Convert the JSON data received into a Map
-      Map<String, dynamic> data = json.decode(jsonData);
-      this.setState(() => messages.add(data['message']));
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: Duration(milliseconds: 600),
-        curve: Curves.ease,
-      );
-    });
-    //Connect to the socket
-    socketIO.connect();
+    // messages = List<String>();
+    // //Initializing the TextEditingController and ScrollController
+    // // textController = TextEditingController();
+    // // scrollController = ScrollController();
+    // //Creating the socket
+    // socketIO = SocketIOManager().createSocketIO(
+    //   'http://namesclash.herokuapp.com',
+    //   '/',
+    // );
+    // //Call init before doing anything with socket
+    // socketIO.init();
+    // //Subscribe to an event to listen to
+    // socketIO.subscribe('receive_message', (jsonData) {
+    //   //Convert the JSON data received into a Map
+    //   Map<String, dynamic> data = json.decode(jsonData);
+    //   this.setState(() => messages.add(data['message']));
+    //   _scrollController.animateTo(
+    //     _scrollController.position.maxScrollExtent,
+    //     duration: Duration(milliseconds: 600),
+    //     curve: Curves.ease,
+    //   );
+    // });
+    // //Connect to the socket
+    // socketIO.connect();
+    // super.initState();
+    connect();
     super.initState();
-    //super.initState();
-    //connect();
     focusNode.addListener(() {
       setState(() {
         show = false;
@@ -60,21 +62,23 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
-  /*void connect() {
-    socket = IO.io("http://192.168.1.107:8000", <String, dynamic>{
+  void connect() {
+    socket = IO.io("https://192.168.1.107:2000", <String, dynamic>{
       "transports": ["websocket"],
       "autoConnect": false,
     });
     socket.connect();
-    socket.emit("conne", "Subham");
-    socket.onConnect((data) => print("Connected"));
+    //socket.emit("conne", "Subham");
+    socket.onConnect((data) {
+      print("Connected");
+      socket.emit("joinRoom", {"gang": "gunjan"});
+    });
     print(socket.connected);
   }
 
   void sendMessage(String message, String name, String target) {
-    socket.emit(
-        "message", {"message": message, "sourceId": name, "targetId": target});
-  }*/
+    socket.emit("chat", {"message": message, "gang": name, "uname": target});
+  }
 
   Widget build(BuildContext context) {
     return Stack(
@@ -105,17 +109,17 @@ class _ChatScreenState extends State<ChatScreen> {
                             height: 70,
                           );
                         }
-                        if (messages[index].type == "source") {
-                          return SentMsg(
-                            message: messages[index].message,
-                            time: messages[index].time,
-                          );
-                        } else {
-                          return ReceivedMsg(
-                            message: messages[index].message,
-                            time: messages[index].time,
-                          );
-                        }
+                        // if (messages[index].type == "source") {
+                        //   return SentMsg(
+                        //     message: messages[index].message,
+                        //     time: messages[index].time,
+                        //   );
+                        // } else {
+                        //   return ReceivedMsg(
+                        //     message: messages[index].message,
+                        //     time: messages[index].time,
+                        //   );
+                        // }
                       },
                     ),
                   ),
@@ -198,10 +202,10 @@ class _ChatScreenState extends State<ChatScreen> {
                                     onPressed: () {
                                       if (_controller.text.isNotEmpty) {
                                         //Send the message as JSON data to send_message event
-                                        socketIO.sendMessage(
-                                            'send_message',
-                                            json.encode(
-                                                {'message': _controller.text}));
+                                        // socketIO.sendMessage(
+                                        //     'send_message',
+                                        //     json.encode(
+                                        //         {'message': _controller.text}));
                                         //Add the message to the list
                                         this.setState(() =>
                                             messages.add(_controller.text));

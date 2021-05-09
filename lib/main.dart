@@ -5,6 +5,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:namesclash/profile.dart';
 import 'package:namesclash/splashscreen.dart';
 import 'package:namesclash/signin.dart';
+import 'package:namesclash/checkchat.dart';
 
 void main() {
   runApp(NameClash());
