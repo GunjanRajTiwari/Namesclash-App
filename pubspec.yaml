@@ -32,6 +32,8 @@ dependencies:
   socket_io_client: ^0.9.12
   flutter_socket_io: ^0.6.0
   emoji_picker: ^0.1.0
+  socket_io: ^0.9.4
+  adhara_socket_io: ^1.0.1+1
 
 dev_dependencies:
   flutter_test:

@@ -1,13 +1,16 @@
 import 'package:emoji_picker/emoji_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_socket_io/flutter_socket_io.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:namesclash/inputbox.dart';
 import 'package:namesclash/main.dart';
 import 'package:namesclash/receivedmsg.dart';
 import 'package:namesclash/sentMsg.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'dart:convert';
-//import 'package:flutter_socket_io/flutter_socket_io.dart' as IO;
+import 'package:flutter_socket_io/flutter_socket_io.dart' as IO;
+//import 'package:flutter_socket_io/socket_io_manager.dart';
+//import 'package:flutter_socket_io/flutter_socket_io.dart';
 import 'package:flutter_socket_io/socket_io_manager.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -17,12 +20,22 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   //SocketIO socketIO;
+  List<String> messages;
+  double height, width;
+  TextEditingController textController;
+  ScrollController scrollController;
+  GoogleSignIn googleSignIn = GoogleSignIn(
+      clientId:
+          "612757339681-u4kcl77t60vduifheh5do3fqspn4uor9.apps.googleusercontent.com");
+  GoogleSignInAccount account;
+  GoogleSignInAuthentication auth;
   bool show = false;
   FocusNode focusNode = FocusNode();
   bool sendButton = false;
-  List<String> messages = [];
-  TextEditingController _controller = TextEditingController();
-  ScrollController _scrollController = ScrollController();
+  //SocketIO socketIO;
+  //List<String> messages = [];
+  //TextEditingController _controller = TextEditingController();
+  //ScrollController _scrollController = ScrollController();
   //IO.SocketIO socket;
 
   IO.Socket socket;
@@ -53,205 +66,346 @@ class _ChatScreenState extends State<ChatScreen> {
     // //Connect to the socket
     // socketIO.connect();
     // super.initState();
-    connect();
+    //connect();
+    messages = List<String>();
+    textController = TextEditingController();
+    scrollController = ScrollController();
+    // socketIO = SocketIOManager().createSocketIO(
+    //   'https://nameclash.herokuapp.com/',
+    //   '/',
+    // );
     super.initState();
-    focusNode.addListener(() {
-      setState(() {
-        show = false;
-      });
-    });
-  }
-
-  void connect() {
     socket = IO.io("https://192.168.1.107:2000", <String, dynamic>{
       "transports": ["websocket"],
       "autoConnect": false,
     });
-    socket.connect();
-    //socket.emit("conne", "Subham");
-    socket.onConnect((data) {
-      print("Connected");
-      socket.emit("joinRoom", {"gang": "gunjan"});
+    //Call init before doing anything with socket
+    //socketIO.init();
+    //Subscribe to an event to listen to
+    socket.on('receive_message', (jsonData) {
+      //Convert the JSON data received into a Map
+      Map<String, dynamic> data = json.decode(jsonData);
+      this.setState(() => messages.add(data['message']));
+      print(data['message']);
+      scrollController.animateTo(
+        scrollController.position.maxScrollExtent,
+        duration: Duration(milliseconds: 600),
+        curve: Curves.ease,
+      );
     });
+    //Connect to the socket
+    socket.connect();
+    socket.onConnect((data) => print("connected"));
     print(socket.connected);
+    //socket.emit("/test", "Hello World");
   }
 
-  void sendMessage(String message, String name, String target) {
-    socket.emit("chat", {"message": message, "gang": name, "uname": target});
-  }
+  // void connect() {
+  //   socket = IO.io("https://nameclash.herokuapp.com/", <String, dynamic>{
+  //     "transport": ["websocket"],
+  //     "autoconnect": false,
+  //   });
+  //   socket.connect();
+  //   socket.onConnect((data) => print("connected"));
+  //   //socket.emit("signin", account.email);
+  // }
 
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Scaffold(
-          backgroundColor: bg,
-          appBar: AppBar(
-            title: Text('Chat'),
-            backgroundColor: bg2,
-          ),
-          body: Container(
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
-            child: WillPopScope(
-              child: Column(
-                // crossAxisAlignment: CrossAxisAlignment.center,
-                // mainAxisSize: MainAxisSize.max,
-                // mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Expanded(
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      controller: _scrollController,
-                      itemCount: messages.length + 1,
-                      itemBuilder: (context, index) {
-                        if (index == messages.length) {
-                          return Container(
-                            height: 70,
-                          );
-                        }
-                        // if (messages[index].type == "source") {
-                        //   return SentMsg(
-                        //     message: messages[index].message,
-                        //     time: messages[index].time,
-                        //   );
-                        // } else {
-                        //   return ReceivedMsg(
-                        //     message: messages[index].message,
-                        //     time: messages[index].time,
-                        //   );
-                        // }
-                      },
-                    ),
-                  ),
-                  Spacer(),
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Container(
-                      height: 70,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                width: MediaQuery.of(context).size.width - 60,
-                                child: Card(
-                                  margin: EdgeInsets.only(
-                                      left: 2, right: 2, bottom: 8),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(25),
-                                  ),
-                                  child: TextFormField(
-                                    controller: _controller,
-                                    focusNode: focusNode,
-                                    textAlignVertical: TextAlignVertical.center,
-                                    keyboardType: TextInputType.multiline,
-                                    maxLines: 5,
-                                    minLines: 1,
-                                    /*onChanged: (value) {
-                                if (value.length > 0) {
-                                  setState(() {
-                                    sendButton = true;
-                                  });
-                                } else {
-                                  setState(() {
-                                    sendButton = true;
-                                  });
-                                }
-                              },*/
-                                    decoration: InputDecoration(
-                                      fillColor: bg2,
-                                      border: InputBorder.none,
-                                      hintText: "Type a message",
-                                      hintStyle: TextStyle(color: bg),
-                                      prefixIcon: IconButton(
-                                        icon: Icon(
-                                          show
-                                              ? Icons.keyboard
-                                              : Icons.emoji_emotions_outlined,
-                                        ),
-                                        onPressed: () {
-                                          if (!show) {
-                                            focusNode.unfocus();
-                                            focusNode.canRequestFocus = false;
-                                          }
-                                          setState(() {
-                                            show = !show;
-                                          });
-                                        },
-                                      ),
-                                      contentPadding: EdgeInsets.all(5),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                  bottom: 8,
-                                  right: 2,
-                                  left: 2,
-                                ),
-                                child: CircleAvatar(
-                                  radius: 25,
-                                  backgroundColor: pc,
-                                  child: IconButton(
-                                    icon: Icon(
-                                      Icons.send,
-                                      color: Colors.white,
-                                    ),
-                                    onPressed: () {
-                                      if (_controller.text.isNotEmpty) {
-                                        //Send the message as JSON data to send_message event
-                                        // socketIO.sendMessage(
-                                        //     'send_message',
-                                        //     json.encode(
-                                        //         {'message': _controller.text}));
-                                        //Add the message to the list
-                                        this.setState(() =>
-                                            messages.add(_controller.text));
-                                        _controller.text = '';
-                                        _scrollController.animateTo(
-                                            _scrollController
-                                                .position.maxScrollExtent,
-                                            duration:
-                                                Duration(milliseconds: 300),
-                                            curve: Curves.easeOut);
-                                        // sendMessage(
-                                        //     _controller.text, "Subham", "Subham");
-                                        _controller.clear();
-                                      }
-                                    },
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          //show ? emojiSelect() : Container(),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        )
-      ],
+  // void sendMessage(String message) {
+  //   socket.emit("typing", "Someone is typing....");
+  // }
+  // void connect() {
+  //   socket = IO.io("https://192.168.1.107:2000", <String, dynamic>{
+  //     "transports": ["websocket"],
+  //     "autoConnect": false,
+  //   });
+  //   socket.connect();
+  //   //socket.emit("conne", "Subham");
+  //   socket.onConnect((data) {
+  //     print("Connected");
+  //     socket.emit("joinRoom", {"gang": "gunjan"});
+  //   });
+  //   print(socket.connected);
+  // }
+
+  // void sendMessage(String message, String name, String target) {
+  //   socket.emit("chat", {"message": message, "gang": name, "uname": target});
+  // }
+  Widget buildSingleMessage(int index) {
+    return Container(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        padding: const EdgeInsets.all(20.0),
+        margin: const EdgeInsets.only(bottom: 20.0, left: 20.0),
+        decoration: BoxDecoration(
+          color: Colors.deepPurple,
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        child: Text(
+          messages[index],
+          style: TextStyle(color: Colors.white, fontSize: 15.0),
+        ),
+      ),
     );
   }
 
-  Widget emojiSelect() {
-    return EmojiPicker(
-      rows: 4,
-      columns: 7,
-      onEmojiSelected: (emoji, category) {
-        print(emoji);
-        setState(
-          () {
-            _controller.text = _controller.text + emoji.emoji;
-          },
-        );
+  Widget buildMessageList() {
+    return Container(
+      height: height * 0.8,
+      width: width,
+      child: ListView.builder(
+        controller: scrollController,
+        itemCount: messages.length,
+        itemBuilder: (BuildContext context, int index) {
+          return buildSingleMessage(index);
+        },
+      ),
+    );
+  }
+
+  Widget buildChatInput() {
+    return Container(
+      width: width * 0.7,
+      padding: const EdgeInsets.all(2.0),
+      margin: const EdgeInsets.only(left: 40.0),
+      child: TextField(
+        decoration: InputDecoration.collapsed(
+          hintText: 'Send a message...',
+        ),
+        controller: textController,
+      ),
+    );
+  }
+
+  Widget buildSendButton() {
+    return FloatingActionButton(
+      backgroundColor: Colors.deepPurple,
+      onPressed: () {
+        //Check if the textfield has text or not
+        if (textController.text.isNotEmpty) {
+          //Send the message as JSON data to send_message event
+          socket.emit('send_message', {'message': textController.text});
+          //Add the message to the list
+          this.setState(() => messages.add(textController.text));
+          textController.text = '';
+          //Scrolldown the list to show the latest message
+          scrollController.animateTo(
+            scrollController.position.maxScrollExtent,
+            duration: Duration(milliseconds: 600),
+            curve: Curves.ease,
+          );
+        }
       },
+      child: Icon(
+        Icons.send,
+        size: 30,
+      ),
+    );
+  }
+
+  Widget buildInputArea() {
+    return Container(
+      height: height * 0.1,
+      width: width,
+      child: Row(
+        children: <Widget>[
+          buildChatInput(),
+          buildSendButton(),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    height = MediaQuery.of(context).size.height;
+    width = MediaQuery.of(context).size.width;
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            SizedBox(height: height * 0.1),
+            buildMessageList(),
+            buildInputArea(),
+          ],
+        ),
+      ),
     );
   }
 }
+
+//   Widget build(BuildContext context) {
+//     return Stack(
+//       children: [
+//         Scaffold(
+//           backgroundColor: bg,
+//           appBar: AppBar(
+//             title: Text('Chat'),
+//             backgroundColor: bg2,
+//           ),
+//           body: Container(
+//             height: MediaQuery.of(context).size.height,
+//             width: MediaQuery.of(context).size.width,
+//             child: WillPopScope(
+//               child: Column(
+//                 // crossAxisAlignment: CrossAxisAlignment.center,
+//                 // mainAxisSize: MainAxisSize.max,
+//                 // mainAxisAlignment: MainAxisAlignment.end,
+//                 children: [
+//                   Expanded(
+//                     child: ListView.builder(
+//                       shrinkWrap: true,
+//                       controller: scrollController,
+//                       itemCount: messages.length + 1,
+//                       itemBuilder: (context, index) {
+//                         if (index == messages.length) {
+//                           return Container(
+//                             height: 70,
+//                           );
+//                         }
+//                         // if (messages[index].type == "source") {
+//                         //   return SentMsg(
+//                         //     message: messages[index].message,
+//                         //     time: messages[index].time,
+//                         //   );
+//                         // } else {
+//                         //   return ReceivedMsg(
+//                         //     message: messages[index].message,
+//                         //     time: messages[index].time,
+//                         //   );
+//                         // }
+//                       },
+//                     ),
+//                   ),
+//                   Spacer(),
+//                   Align(
+//                     alignment: Alignment.bottomCenter,
+//                     child: Container(
+//                       height: 70,
+//                       child: Column(
+//                         mainAxisAlignment: MainAxisAlignment.end,
+//                         children: [
+//                           Row(
+//                             children: [
+//                               Container(
+//                                 width: MediaQuery.of(context).size.width - 60,
+//                                 child: Card(
+//                                   margin: EdgeInsets.only(
+//                                       left: 2, right: 2, bottom: 8),
+//                                   shape: RoundedRectangleBorder(
+//                                     borderRadius: BorderRadius.circular(25),
+//                                   ),
+//                                   child: TextFormField(
+//                                     controller: textController,
+//                                     focusNode: focusNode,
+//                                     textAlignVertical: TextAlignVertical.center,
+//                                     keyboardType: TextInputType.multiline,
+//                                     maxLines: 5,
+//                                     minLines: 1,
+//                                     /*onChanged: (value) {
+//                                 if (value.length > 0) {
+//                                   setState(() {
+//                                     sendButton = true;
+//                                   });
+//                                 } else {
+//                                   setState(() {
+//                                     sendButton = true;
+//                                   });
+//                                 }
+//                               },*/
+//                                     decoration: InputDecoration(
+//                                       fillColor: bg2,
+//                                       border: InputBorder.none,
+//                                       hintText: "Type a message",
+//                                       hintStyle: TextStyle(color: bg),
+//                                       prefixIcon: IconButton(
+//                                         icon: Icon(
+//                                           show
+//                                               ? Icons.keyboard
+//                                               : Icons.emoji_emotions_outlined,
+//                                         ),
+//                                         onPressed: () {
+//                                           if (!show) {
+//                                             focusNode.unfocus();
+//                                             focusNode.canRequestFocus = false;
+//                                           }
+//                                           setState(() {
+//                                             show = !show;
+//                                           });
+//                                         },
+//                                       ),
+//                                       contentPadding: EdgeInsets.all(5),
+//                                     ),
+//                                   ),
+//                                 ),
+//                               ),
+//                               Padding(
+//                                 padding: const EdgeInsets.only(
+//                                   bottom: 8,
+//                                   right: 2,
+//                                   left: 2,
+//                                 ),
+//                                 child: CircleAvatar(
+//                                   radius: 25,
+//                                   backgroundColor: pc,
+//                                   child: IconButton(
+//                                     icon: Icon(
+//                                       Icons.send,
+//                                       color: Colors.white,
+//                                     ),
+//                                     onPressed: () {
+//                                       if (textController.text.isNotEmpty) {
+//                                         //Send the message as JSON data to send_message event
+//                                         socketIO.sendMessage(
+//                                             'send_message',
+//                                             json.encode({
+//                                               'message': textController.text
+//                                             }));
+//                                         //Add the message to the list
+//                                         this.setState(() =>
+//                                             messages.add(textController.text));
+//                                         textController.text = '';
+//                                         scrollController.animateTo(
+//                                             scrollController
+//                                                 .position.maxScrollExtent,
+//                                             duration:
+//                                                 Duration(milliseconds: 300),
+//                                             curve: Curves.easeOut);
+//                                         // sendMessage(
+//                                         //     _controller.text, "Subham", "Subham");
+//                                         textController.clear();
+//                                       }
+//                                     },
+//                                   ),
+//                                 ),
+//                               ),
+//                             ],
+//                           ),
+//                           //show ? emojiSelect() : Container(),
+//                         ],
+//                       ),
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//             ),
+//           ),
+//         )
+//       ],
+//     );
+//   }
+
+//   Widget emojiSelect() {
+//     return EmojiPicker(
+//       rows: 4,
+//       columns: 7,
+//       onEmojiSelected: (emoji, category) {
+//         print(emoji);
+//         setState(
+//           () {
+//             textController.text = textController.text + emoji.emoji;
+//           },
+//         );
+//       },
+//     );
+//   }
+// }
