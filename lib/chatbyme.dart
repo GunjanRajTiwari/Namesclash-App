@@ -75,18 +75,17 @@ class _ChatScreenState extends State<ChatScreen> {
     //   '/',
     // );
     super.initState();
-    socket = IO.io("https://192.168.1.107:2000", <String, dynamic>{
+    socket = IO.io("https://nameclash.herokuapp.com/", <String, dynamic>{
       "transports": ["websocket"],
       "autoConnect": false,
     });
     //Call init before doing anything with socket
     //socketIO.init();
     //Subscribe to an event to listen to
-    socket.on('receive_message', (jsonData) {
+    socket.on('receive_message', (data) {
       //Convert the JSON data received into a Map
-      Map<String, dynamic> data = json.decode(jsonData);
-      this.setState(() => messages.add(data['message']));
-      print(data['message']);
+      this.setState(() => messages.add(data));
+      print(data);
       scrollController.animateTo(
         scrollController.position.maxScrollExtent,
         duration: Duration(milliseconds: 600),
