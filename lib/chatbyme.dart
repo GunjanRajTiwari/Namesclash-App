@@ -1,134 +1,55 @@
-import 'package:emoji_picker/emoji_picker.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_socket_io/flutter_socket_io.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:namesclash/inputbox.dart';
-import 'package:namesclash/main.dart';
-import 'package:namesclash/receivedmsg.dart';
-import 'package:namesclash/sentMsg.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'dart:convert';
-import 'package:flutter_socket_io/flutter_socket_io.dart' as IO;
-//import 'package:flutter_socket_io/socket_io_manager.dart';
-//import 'package:flutter_socket_io/flutter_socket_io.dart';
-import 'package:flutter_socket_io/socket_io_manager.dart';
 
-class ChatScreen extends StatefulWidget {
+import 'package:flutter/material.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
+
+class ChatPage extends StatefulWidget {
   @override
-  _ChatScreenState createState() => _ChatScreenState();
+  _ChatPageState createState() => _ChatPageState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
-  //SocketIO socketIO;
+class _ChatPageState extends State<ChatPage> {
   List<String> messages;
   double height, width;
   TextEditingController textController;
   ScrollController scrollController;
-  GoogleSignIn googleSignIn = GoogleSignIn(
-      clientId:
-          "612757339681-u4kcl77t60vduifheh5do3fqspn4uor9.apps.googleusercontent.com");
-  GoogleSignInAccount account;
-  GoogleSignInAuthentication auth;
-  bool show = false;
-  FocusNode focusNode = FocusNode();
-  bool sendButton = false;
-  //SocketIO socketIO;
-  //List<String> messages = [];
-  //TextEditingController _controller = TextEditingController();
-  //ScrollController _scrollController = ScrollController();
-  //IO.SocketIO socket;
-
   IO.Socket socket;
+
   @override
   void initState() {
-    // messages = List<String>();
-    // //Initializing the TextEditingController and ScrollController
-    // // textController = TextEditingController();
-    // // scrollController = ScrollController();
-    // //Creating the socket
-    // socketIO = SocketIOManager().createSocketIO(
-    //   'http://namesclash.herokuapp.com',
-    //   '/',
-    // );
-    // //Call init before doing anything with socket
-    // socketIO.init();
-    // //Subscribe to an event to listen to
-    // socketIO.subscribe('receive_message', (jsonData) {
-    //   //Convert the JSON data received into a Map
-    //   Map<String, dynamic> data = json.decode(jsonData);
-    //   this.setState(() => messages.add(data['message']));
-    //   _scrollController.animateTo(
-    //     _scrollController.position.maxScrollExtent,
-    //     duration: Duration(milliseconds: 600),
-    //     curve: Curves.ease,
-    //   );
-    // });
-    // //Connect to the socket
-    // socketIO.connect();
-    // super.initState();
-    //connect();
+    //Initializing the message list
     messages = List<String>();
+    //Initializing the TextEditingController and ScrollController
     textController = TextEditingController();
     scrollController = ScrollController();
-    // socketIO = SocketIOManager().createSocketIO(
-    //   'https://nameclash.herokuapp.com/',
-    //   '/',
-    // );
-    super.initState();
+    //Creating the socket
     socket = IO.io("https://nameclash.herokuapp.com/", <String, dynamic>{
       "transports": ["websocket"],
       "autoConnect": false,
     });
+    socket.connect();
+    //https://nameclash.herokuapp.com
     //Call init before doing anything with socket
-    //socketIO.init();
     //Subscribe to an event to listen to
-    socket.on('receive_message', (data) {
-      //Convert the JSON data received into a Map
-      this.setState(() => messages.add(data));
-      print(data);
-      scrollController.animateTo(
-        scrollController.position.maxScrollExtent,
-        duration: Duration(milliseconds: 600),
-        curve: Curves.ease,
-      );
+    socket.onConnect((data) {
+      print("connected");
+      socket.on('receive_message', (jsonData) {
+        //Convert the JSON data received into a Map
+        Map<String, dynamic> data = json.decode(jsonData);
+        print(data);
+        this.setState(() => messages.add(data['message']));
+        scrollController.animateTo(
+          scrollController.position.maxScrollExtent,
+          duration: Duration(milliseconds: 600),
+          curve: Curves.ease,
+        );
+      });
     });
     //Connect to the socket
-    socket.connect();
-    socket.onConnect((data) => print("connected"));
-    print(socket.connected);
-    //socket.emit("/test", "Hello World");
+
+    super.initState();
   }
 
-  // void connect() {
-  //   socket = IO.io("https://nameclash.herokuapp.com/", <String, dynamic>{
-  //     "transport": ["websocket"],
-  //     "autoconnect": false,
-  //   });
-  //   socket.connect();
-  //   socket.onConnect((data) => print("connected"));
-  //   //socket.emit("signin", account.email);
-  // }
-
-  // void sendMessage(String message) {
-  //   socket.emit("typing", "Someone is typing....");
-  // }
-  // void connect() {
-  //   socket = IO.io("https://192.168.1.107:2000", <String, dynamic>{
-  //     "transports": ["websocket"],
-  //     "autoConnect": false,
-  //   });
-  //   socket.connect();
-  //   //socket.emit("conne", "Subham");
-  //   socket.onConnect((data) {
-  //     print("Connected");
-  //     socket.emit("joinRoom", {"gang": "gunjan"});
-  //   });
-  //   print(socket.connected);
-  // }
-
-  // void sendMessage(String message, String name, String target) {
-  //   socket.emit("chat", {"message": message, "gang": name, "uname": target});
-  // }
   Widget buildSingleMessage(int index) {
     return Container(
       alignment: Alignment.centerLeft,
@@ -182,7 +103,8 @@ class _ChatScreenState extends State<ChatScreen> {
         //Check if the textfield has text or not
         if (textController.text.isNotEmpty) {
           //Send the message as JSON data to send_message event
-          socket.emit('send_message', {'message': textController.text});
+          socket.emit(
+              'send_message', json.encode({'message': textController.text}));
           //Add the message to the list
           this.setState(() => messages.add(textController.text));
           textController.text = '';
@@ -286,63 +208,63 @@ class _ChatScreenState extends State<ChatScreen> {
 //                           Row(
 //                             children: [
 //                               Container(
-//                                 width: MediaQuery.of(context).size.width - 60,
-//                                 child: Card(
-//                                   margin: EdgeInsets.only(
-//                                       left: 2, right: 2, bottom: 8),
-//                                   shape: RoundedRectangleBorder(
-//                                     borderRadius: BorderRadius.circular(25),
-//                                   ),
-//                                   child: TextFormField(
-//                                     controller: textController,
-//                                     focusNode: focusNode,
-//                                     textAlignVertical: TextAlignVertical.center,
-//                                     keyboardType: TextInputType.multiline,
-//                                     maxLines: 5,
-//                                     minLines: 1,
-//                                     /*onChanged: (value) {
-//                                 if (value.length > 0) {
-//                                   setState(() {
-//                                     sendButton = true;
-//                                   });
-//                                 } else {
-//                                   setState(() {
-//                                     sendButton = true;
-//                                   });
-//                                 }
-//                               },*/
-//                                     decoration: InputDecoration(
-//                                       fillColor: bg2,
-//                                       border: InputBorder.none,
-//                                       hintText: "Type a message",
-//                                       hintStyle: TextStyle(color: bg),
-//                                       prefixIcon: IconButton(
-//                                         icon: Icon(
-//                                           show
-//                                               ? Icons.keyboard
-//                                               : Icons.emoji_emotions_outlined,
-//                                         ),
-//                                         onPressed: () {
-//                                           if (!show) {
-//                                             focusNode.unfocus();
-//                                             focusNode.canRequestFocus = false;
-//                                           }
-//                                           setState(() {
-//                                             show = !show;
-//                                           });
-//                                         },
-//                                       ),
-//                                       contentPadding: EdgeInsets.all(5),
-//                                     ),
-//                                   ),
-//                                 ),
-//                               ),
-//                               Padding(
-//                                 padding: const EdgeInsets.only(
-//                                   bottom: 8,
-//                                   right: 2,
-//                                   left: 2,
-//                                 ),
+                              //   width: MediaQuery.of(context).size.width - 60,
+                              //   child: Card(
+                              //     margin: EdgeInsets.only(
+                              //         left: 2, right: 2, bottom: 8),
+                              //     shape: RoundedRectangleBorder(
+                              //       borderRadius: BorderRadius.circular(25),
+                              //     ),
+                              //     child: TextFormField(
+                              //       controller: textController,
+                              //       focusNode: focusNode,
+                              //       textAlignVertical: TextAlignVertical.center,
+                              //       keyboardType: TextInputType.multiline,
+                              //       maxLines: 5,
+                              //       minLines: 1,
+                              //       /*onChanged: (value) {
+                              //   if (value.length > 0) {
+                              //     setState(() {
+                              //       sendButton = true;
+                              //     });
+                              //   } else {
+                              //     setState(() {
+                              //       sendButton = true;
+                              //     });
+                              //   }
+                              // },*/
+                              //       decoration: InputDecoration(
+                              //         fillColor: bg2,
+                              //         border: InputBorder.none,
+                              //         hintText: "Type a message",
+                              //         hintStyle: TextStyle(color: bg),
+                              //         prefixIcon: IconButton(
+                              //           icon: Icon(
+                              //             show
+                              //                 ? Icons.keyboard
+                              //                 : Icons.emoji_emotions_outlined,
+                              //           ),
+                              //           onPressed: () {
+                              //             if (!show) {
+                              //               focusNode.unfocus();
+                              //               focusNode.canRequestFocus = false;
+                              //             }
+                              //             setState(() {
+                              //               show = !show;
+                              //             });
+                              //           },
+                              //         ),
+                              //         contentPadding: EdgeInsets.all(5),
+                              //       ),
+                              //     ),
+                              //   ),
+                              // ),
+                              // Padding(
+                              //   padding: const EdgeInsets.only(
+                              //     bottom: 8,
+                              //     right: 2,
+                              //     left: 2,
+                              //   ),
 //                                 child: CircleAvatar(
 //                                   radius: 25,
 //                                   backgroundColor: pc,
@@ -354,7 +276,7 @@ class _ChatScreenState extends State<ChatScreen> {
 //                                     onPressed: () {
 //                                       if (textController.text.isNotEmpty) {
 //                                         //Send the message as JSON data to send_message event
-//                                         socketIO.sendMessage(
+//                                         socket.emit(
 //                                             'send_message',
 //                                             json.encode({
 //                                               'message': textController.text
