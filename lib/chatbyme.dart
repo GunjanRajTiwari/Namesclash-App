@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/material.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
@@ -9,6 +9,11 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
+  GoogleSignIn googleSignIn = GoogleSignIn(
+      clientId:
+          "612757339681-u4kcl77t60vduifheh5do3fqspn4uor9.apps.googleusercontent.com");
+  GoogleSignInAccount account;
+  GoogleSignInAuthentication auth;
   List<String> messages;
   double height, width;
   TextEditingController textController;
@@ -32,8 +37,9 @@ class _ChatPageState extends State<ChatPage> {
     //Call init before doing anything with socket
     //Subscribe to an event to listen to
     socket.onConnect((data) {
+      socket.emit("joinRoom", account.displayName);
       print("connected");
-      socket.on('receive_message', (jsonData) {
+      socket.on("receive_message", (jsonData) {
         //Convert the JSON data received into a Map
         Map<String, dynamic> data = json.decode(jsonData);
         print(data);
@@ -104,7 +110,7 @@ class _ChatPageState extends State<ChatPage> {
         if (textController.text.isNotEmpty) {
           //Send the message as JSON data to send_message event
           socket.emit(
-              'send_message', json.encode({'message': textController.text}));
+              "send_message", json.encode({'message': textController.text}));
           //Add the message to the list
           this.setState(() => messages.add(textController.text));
           textController.text = '';

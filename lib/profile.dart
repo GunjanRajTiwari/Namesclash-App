@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:namesclash/chatbyme.dart';
 import 'package:namesclash/name.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:namesclash/splashscreen.dart';
@@ -27,10 +28,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         elevation: 0,
         height: 50,
         onPressed: () {
-          // if (showValue) {
-          //   Navigator.push(
-          //       context, MaterialPageRoute(builder: (_) => NamePage()));
-          // }
+          MaterialPageRoute(builder: (_) => ChatPage());
         },
         color: pc,
         child: Row(

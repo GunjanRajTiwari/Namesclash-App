@@ -24,10 +24,11 @@ class NameClash extends StatelessWidget {
       title: "NamesClash",
       //home: SplashScreen(),
       routes: {
-        '/': (_) => ChatPage(),
+        '/': (_) => SplashScreen(),
         '/MySignInPage': (_) => MySignInPage(),
         //'/name': (_) => NamePage(),
         '/profile': (_) => ProfileScreen(),
+        //'/chat': (_) => ChatPage(),
       },
     );
   }
